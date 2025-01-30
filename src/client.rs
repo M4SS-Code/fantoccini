@@ -16,7 +16,7 @@ use serde_json::Value as Json;
 use std::convert::{Infallible, TryFrom, TryInto as _};
 use std::future::Future;
 use tokio::sync::{mpsc, oneshot};
-use webdriver::command::{SendKeysParameters, WebDriverCommand};
+use webdriver::command::{PrintMargins, PrintParameters, SendKeysParameters, WebDriverCommand};
 use webdriver::common::{FrameId, ELEMENT_KEY};
 
 // Used only under `native-tls`
@@ -1087,6 +1087,28 @@ impl Client {
     #[cfg_attr(docsrs, doc(alias = "Take Screenshot"))]
     pub async fn screenshot(&self) -> Result<Vec<u8>, error::CmdError> {
         let src = self.issue(WebDriverCommand::TakeScreenshot).await?;
+        if let Some(src) = src.as_str() {
+            base64::engine::general_purpose::STANDARD
+                .decode(src)
+                .map_err(error::CmdError::ImageDecodeError)
+        } else {
+            Err(error::CmdError::NotW3C(src))
+        }
+    }
+
+    /// sadassdsaas
+    pub async fn print(&self) -> Result<Vec<u8>, error::CmdError> {
+        let src = self
+            .issue(WebDriverCommand::Print(PrintParameters {
+                margin: PrintMargins {
+                    top: 0.0,
+                    right: 0.0,
+                    bottom: 0.0,
+                    left: 0.0,
+                },
+                ..Default::default()
+            }))
+            .await?;
         if let Some(src) = src.as_str() {
             base64::engine::general_purpose::STANDARD
                 .decode(src)
