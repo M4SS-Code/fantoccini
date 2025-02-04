@@ -1100,6 +1100,7 @@ impl Client {
     pub async fn print(&self) -> Result<Vec<u8>, error::CmdError> {
         let src = self
             .issue(WebDriverCommand::Print(PrintParameters {
+                background: true,
                 margin: PrintMargins {
                     top: 0.0,
                     right: 0.0,
