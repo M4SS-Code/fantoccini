@@ -16,7 +16,9 @@ use serde_json::Value as Json;
 use std::convert::{Infallible, TryFrom, TryInto as _};
 use std::future::Future;
 use tokio::sync::{mpsc, oneshot};
-use webdriver::command::{PrintMargins, PrintParameters, SendKeysParameters, WebDriverCommand};
+use webdriver::command::{
+    PrintMargins, PrintPage, PrintParameters, SendKeysParameters, WebDriverCommand,
+};
 use webdriver::common::{FrameId, ELEMENT_KEY};
 
 // Used only under `native-tls`
@@ -1098,7 +1100,11 @@ impl Client {
     }
 
     /// sadassdsaas
-    pub async fn print(&self) -> Result<Vec<u8>, error::CmdError> {
+    pub async fn print(
+        &self,
+        print_page_width: f64,
+        print_page_height: f64,
+    ) -> Result<Vec<u8>, error::CmdError> {
         let src = self
             .issue(WebDriverCommand::Print(PrintParameters {
                 background: true,
@@ -1107,6 +1113,10 @@ impl Client {
                     right: 0.0,
                     bottom: 0.0,
                     left: 0.0,
+                },
+                page: PrintPage {
+                    width: print_page_width,
+                    height: print_page_height,
                 },
                 ..Default::default()
             }))
